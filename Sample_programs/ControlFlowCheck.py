@@ -1,3 +1,6 @@
+"""
+    sample program to find the flow 
+"""
 # def aaa(a):
 #     print "in a",a;
 #     def bbb(b):
