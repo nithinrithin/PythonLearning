@@ -50,12 +50,11 @@ if logger:
     print "="*30
 
 def check_logger(fun):
-    def innerFun(*x,**y):
-        if not logger:
-            print "logger off"
-        else:
-            return fun
-    return innerFun
+    if logger:
+        return fun
+    else:
+        def dummy():pass
+        return dummy
 
 #@check_logger
 def printfullMatrix(sk):
@@ -204,11 +203,11 @@ print "="*30
 
 import copy
 dummy_sk = deepcopy(sk) 
-round = 1
+loop = 1
 fm = findsMap
 
 while (True):
-    print "="*10+"round"+str(round)+"="*10
+    print "="*10+"round"+str(loop)+"="*10
     stop = True
     dummy_skt = zip(*dummy_sk)
     for key,value in fm.items():
@@ -229,7 +228,7 @@ while (True):
                     stop = False
             except: StopIteration, "hold it"
     
-    print "="*10+"end of round"+str(round)+"="*10
+    print "="*10+"end of round"+str(loop)+"="*10
     
     if len(fm) == 0:
         print "\n"+"_"*5+"Solved Success!"+"_"*5+"\n"
@@ -244,7 +243,7 @@ while (True):
 #     print "keys", fm.viewkeys()
 #     print "dic len",len(fm)
 #     printfullMatrix(dummy_sk)
-    round += 1
+    loop += 1
  
 printfullMatrix(sk)
 printfullMatrix(dummy_sk)
