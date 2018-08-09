@@ -216,7 +216,7 @@ while (True):
         if value.__len__() == 1:
             if dummy_sk[i][j] == 0:
                 dummy_sk[i][j] = value[0]
-                print value[0],"added to dummy",key
+                print "At [{0:d}][{0:d}] -> {0:d}".format(i,j,value[0])
                 del fm[key]
                 stop = False
         else:
