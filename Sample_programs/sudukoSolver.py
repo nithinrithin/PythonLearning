@@ -45,9 +45,9 @@ logger = False
 findsMap = {}
 
 if logger:
-    print "*"*10+"Input"+"*"*10
+    print "="*10+"Input"+"="*10
     for i in range(9): print sk[i]
-    print "*"*30
+    print "="*30
 
 def check_logger(fun):
     def innerFun(*x,**y):
@@ -59,16 +59,19 @@ def check_logger(fun):
 
 #@check_logger
 def printfullMatrix(sk):
-    print "*"*10+"matrix"+"*"*10
+    print "="*10+"matrix"+"="*10
     for i in range(9):
         for j in range(9):
-            print str(sk[i][j])+" ",
+            if sk[i][j]:
+                print str(sk[i][j])+" ",
+            else:
+                print "* ",
         print ""
-    print "*"*30
+    print "="*30
     
 @check_logger
 def printGroupCreation():
-    print "*"*10+"group"+"*"*10
+    print "="*10+"group"+"="*10
     for i in range(3):
         for j in range(3):
             for k in range(3):
@@ -77,7 +80,7 @@ def printGroupCreation():
                 print ""
 
 def saveGroups():
-    print "*"*10+"save group"+"*"*10
+    print "="*10+"save group"+"="*10
     group_list = []
     for i in range(3):
         for j in range(3):
@@ -88,18 +91,18 @@ def saveGroups():
                 print group_list
             groups.append(group_list)
             group_list = []
-    print "*"*30
+    print "="*30
 
 @check_logger
 def printGroup():
-    print "*"*10+"print group"+"*"*10
+    print "="*10+"print group"+"="*10
     for i in groups : print i
-    print "*"*10+"processing"+"*"*10
+    print "="*10+"processing"+"="*10
 
 def printFindsMap(d):
-    print "*"*10+"printing answers map"+"*"*10
+    print "="*10+"printing answers map"+"="*10
     for item in d.items(): print item
-    print "*"*30
+    print "="*30
 
 @check_logger
 def get_from_map(i,j):
@@ -108,7 +111,7 @@ def get_from_map(i,j):
 
 @check_logger
 def printProcessResult():
-    print "*"*10+"printing final answer"+"*"*10
+    print "="*10+"printing final answer"+"="*10
     for i in range(9):
         for j in range(9):
             if sk[i][j] == False:
@@ -192,12 +195,12 @@ for i in range(9):
 #         else:
 #             print str(sk[i][j])+" ",
 print ""
-print "*"*10+"processing over"+"*"*10
+print "="*10+"processing over"+"="*10
 print ""
 
 printFindsMap(findsMap)
 printProcessResult()
-print "*"*30
+print "="*30
 
 import copy
 dummy_sk = deepcopy(sk) 
@@ -205,7 +208,7 @@ round = 1
 fm = findsMap
 
 while (True):
-    print "*"*10+"round"+str(round)+"*"*10
+    print "="*10+"round"+str(round)+"="*10
     stop = True
     dummy_skt = zip(*dummy_sk)
     for key,value in fm.items():
@@ -225,18 +228,23 @@ while (True):
                     findsMap.update({str(i)+str(j):tmp})
                     stop = False
             except: StopIteration, "hold it"
+    
+    print "="*10+"end of round"+str(round)+"="*10
+    
     if len(fm) == 0:
+        print "\n"+"_"*5+"Solved Success!"+"_"*5+"\n"
         break
     
     if stop:
         printFindsMap(fm)
         printSolverBreaker();
+        print "\n"+"_"*5+"Failed Ooch!"+"_"*5+"\n"
         break
     
-    print "keys", fm.viewkeys()
-    print "dic len",len(fm)
+#     print "keys", fm.viewkeys()
+#     print "dic len",len(fm)
 #     printfullMatrix(dummy_sk)
-    print "*"*10+"end of round"+str(round)+"*"*10
-    round += 1 
+    round += 1
+ 
 printfullMatrix(sk)
 printfullMatrix(dummy_sk)
