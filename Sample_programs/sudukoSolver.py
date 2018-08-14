@@ -2,6 +2,7 @@
     program to solve sudoko
 """
 from copy import deepcopy
+from wxPython._wx import false
 
 #[[],[],[],[],[],[],[],[],[]]
 suduko = [  [4,1,8,3,0,0,0,0,6],
@@ -14,9 +15,23 @@ suduko = [  [4,1,8,3,0,0,0,0,6],
             [0,7,0,0,6,2,0,0,0],
             [8,0,0,0,0,3,2,7,9]
             ]
+# sk = suduko
+
+"""pro"""
+suduko = [  [0,2,8,0,7,5,0,1,0],
+            [6,0,7,0,0,8,0,0,0],
+            [0,5,0,0,0,0,0,0,0],
+            [0,9,7,8,0,0,0,5,0],
+            [0,7,0,0,6,0,0,3,0],
+            [0,8,0,0,5,1,7,0,0],
+            [0,0,0,0,0,0,0,2,0],
+            [0,0,0,4,0,0,8,0,1],
+            [0,4,0,8,1,0,3,7,0],
+    ]
 sk = suduko
+
 """hard"""
-sudoko = [  [0,0,8,0,6,0,0,0,2],
+suduko = [  [0,0,8,0,6,0,0,0,2],
             [0,0,0,2,0,0,0,0,7],
             [2,0,0,4,0,5,0,0,0],
             [0,2,0,6,3,0,5,1,0],
@@ -26,7 +41,7 @@ sudoko = [  [0,0,8,0,6,0,0,0,2],
             [8,0,0,0,0,2,0,0,0],
             [9,0,0,0,8,0,7,0,0],
     ]
-#sk = suduko
+# sk = suduko
 """hardest"""
 suduko = [  [8,0,0,0,0,0,0,0,0],
             [0,0,3,6,0,0,0,0,0],
@@ -42,7 +57,9 @@ suduko = [  [8,0,0,0,0,0,0,0,0],
 groups = []
 skt = zip(*sk)
 logger = False
-findsMap = {}
+isSolved = False
+from collections import OrderedDict
+findsMap = OrderedDict()
 
 if logger:
     print "="*10+"Input"+"="*10
@@ -78,7 +95,7 @@ def printGroupCreation():
                     print str(sk[k+(i*3)][l+(j*3)])+" ",
                 print ""
 
-def saveGroups():
+def create_groups():
     print "="*10+"save group"+"="*10
     group_list = []
     for i in range(3):
@@ -92,6 +109,15 @@ def saveGroups():
             group_list = []
     print "="*30
 
+def create_findsmap():
+    for i in range(9):
+        for j in range(9):
+            if sk[i][j] == False:
+                try:
+                    val = level1solver(i,j, sk, skt)
+                    findsMap.update({str(i)+str(j):val})
+                except  StopIteration:
+                    print "check log"
 @check_logger
 def printGroup():
     print "="*10+"print group"+"="*10
@@ -101,6 +127,7 @@ def printGroup():
 def printFindsMap(d):
     print "="*10+"printing answers map"+"="*10
     for item in d.items(): print item
+    print "----",len(d),"----"
     print "="*30
 
 @check_logger
@@ -119,9 +146,85 @@ def printProcessResult():
                 print sk[i][j],
         print ""
 
-
-def findMissingValue(i, j, matrix, tmatrix):
     
+def printSolverBreaker():
+    for i in range(9):
+        for j in range(9):
+            key = str(i)+str(j)
+            if key in findsMap.keys():
+                print key,"-->",findsMap.get(key)
+
+# def findMissingValue(i, j, matrix, tmatrix):
+#     
+#     group_index = (i-(i%3))+(j/3)
+#     
+#     from itertools import chain
+#     existing = set(chain(chain(groups[group_index],
+#                             matrix[i][:], tmatrix[j][:])))
+#     
+#     tmpValues =  [x for x in xrange(1,10)
+#                    if x not in existing]
+#     
+#     if logger:
+#         print "index->",i,j
+#         print "group index",group_index
+#         print "group", groups[group_index]
+#         print "i->",matrix[i][:]
+#         print "j->",tmatrix[j][:]
+#         print "existing->",existing
+#         print "temp - >", tmpValues
+#         print findsMap
+#     if len(tmpValues) == 0:
+#         raise StopIteration, "pothum"
+#     
+#     return tmpValues
+
+def solver(item, matrix):
+    key, value = item
+    tmatrix = zip(*matrix)
+    i = int(key[0])
+    j = int(key[1])
+    group_index = (i-(i%3))+(j/3)
+    group_value_index = (i%3)+(2*(i%3))+(j%3)
+    is_updated = False
+    if value.__len__() == 1:
+        if matrix[i][j] == 0:
+            matrix[i][j] = value[0]
+            groups[group_index][group_value_index] = value[0]
+            print "At1 [{0:d}][{1:d}] -> {2:d}".format(i,j,value[0])
+            del findsMap[key]
+            is_updated = True
+    else:
+        try:
+            tmp = level1solver(i, j, matrix, tmatrix)
+#             print key,"-l1-->",tmp
+            if findsMap[key] != tmp:
+                findsMap.update({str(i)+str(j):tmp})
+        except: StopIteration, "hold it"
+    
+    if len(findsMap) == 0:
+        print "\n"+"_"*5+"Solved Success!"+"_"*5+"\n"
+
+    if not is_updated:
+#         print "\n"+"_"*5+"Calling level 2!"+"_"*5+"\n"
+        tmp  = level2solver(key, matrix, tmatrix)
+        if tmp is None:
+            return matrix
+        if len(tmp) == 1:
+            matrix[i][j] = tmp[0]
+            groups[group_index][group_value_index] = value[0]
+            print "at2 [{0:d}][{1:d}] -> {2:d}".format(i,j,value[0])
+            del findsMap[key]
+        else:
+            print "l2:",findsMap[key],tmp
+            if findsMap[key] != tmp:
+                findsMap.update({str(i)+str(j):tmp})
+        print tmp
+        
+    return matrix
+
+def level1solver(i, j, matrix, tmatrix):
+#     print "="*10+"Level 1"+"="*10
     group_index = (i-(i%3))+(j/3)
     
     from itertools import chain
@@ -130,33 +233,8 @@ def findMissingValue(i, j, matrix, tmatrix):
     
     tmpValues =  [x for x in xrange(1,10)
                    if x not in existing]
-    findsMap.update({str(i)+str(j):tmpValues})
+    
     if logger:
-        print "index->",i,j
-        print "group index",group_index
-        print "group", groups[group_index]
-        print "i->",matrix[i][:]
-        print "j->",tmatrix[j][:]
-        print "existing->",existing
-        print "temp - >", tmpValues
-        print findsMap
-    if len(tmpValues) == 0:
-        raise StopIteration, "pothum"
-
-
-def solver(i, j, matrix, tmatrix):
-    
-#     print "index->",i,j
-    group_index = (i-(i%3))+(j/3)
-    
-    from itertools import chain
-    existing = set(chain(chain(groups[group_index],
-                            matrix[i][:], tmatrix[j][:])))
-    
-    tmpValues =  [x for x in xrange(1,10)
-                   if x not in existing]
-    
-    if False:
         print "index->",i,j
         print "group index",group_index
         print "group", groups[group_index]
@@ -169,81 +247,75 @@ def solver(i, j, matrix, tmatrix):
         raise StopIteration, "pothum"
     
     return tmpValues
+                
+def level2solver(key, matrix, tmatrix):
+#     print "="*10+"Level 2"+"="*10
+#         print key,value
+    i = int(key[0])
+    j = int(key[1])
+    row = [[1,2,3],[4,5,6],[7,8,9]]
+    clm = [[1,2,3],[4,5,6],[7,8,9]]
+    rv = row[i/3]
+    cv = clm[j/3]
+    del rv[i%3]
+    del cv[j%3]
+    group_index = (i-(i%3))+(j%3)
+    commonRowsValues = set(matrix[rv[0]-1]).intersection(set(matrix[rv[1]-1]))
+    commonClmValues = set(tmatrix[cv[0]-1]).intersection(set(tmatrix[cv[1]-1]))
+    avail_values = commonRowsValues.intersection(commonClmValues)
+    avail_values = avail_values.difference(set(groups[group_index]))
+    avail_values = avail_values.intersection(findsMap[key])
+    if key=='27':
+        print "========",i,j,findsMap[str(i)+str(j)]
+        print "rv",commonRowsValues
+        print "cv",commonClmValues
+        print "kk",avail_values
+        print "group index", groups[group_index]
+        print "========"
     
-def printSolverBreaker():
-    for i in range(9):
-        for j in range(9):
-            key = str(i)+str(j)
-            if key in findsMap.keys():
-                print key,"-->",findsMap.get(key)
+    if ((avail_values is not None) and len(avail_values)):
+        avail_values.difference(set([0]))
+        tmp = list(avail_values)
+        tmp.sort()
+        return tmp
+    
+    return None
+                    
+                    
 """
     control starts below
 """   
-saveGroups()
-#printfullMatrix(sk)
-#printfullMatrix(skt)
+create_groups()
+create_findsmap()
 
-for i in range(9):
-    for j in range(9):
-        if sk[i][j] == False:
-            try:
-                findMissingValue(i,j, sk, skt)
-            except  StopIteration:
-                print "check log"
+
 #     break
 #         else:
 #             print str(sk[i][j])+" ",
-print ""
-print "="*10+"processing over"+"="*10
-print ""
 
 printFindsMap(findsMap)
+printfullMatrix(sk)
 printProcessResult()
 print "="*30
 
 import copy
 dummy_sk = deepcopy(sk) 
 loop = 1
-fm = findsMap
 
 while (True):
     print "="*10+"round"+str(loop)+"="*10
-    stop = True
-    dummy_skt = zip(*dummy_sk)
-    for key,value in fm.items():
-        i = int(key[0])
-        j = int(key[1])
-        if value.__len__() == 1:
-            if dummy_sk[i][j] == 0:
-                dummy_sk[i][j] = value[0]
-                print "At [{0:d}][{0:d}] -> {0:d}".format(i,j,value[0])
-                del fm[key]
-                stop = False
-        else:
-            try:
-#                 print key,"-->",value
-                tmp = solver(i, j, dummy_sk, dummy_skt)
-                if fm[key] != tmp:
-                    findsMap.update({str(i)+str(j):tmp})
-                    stop = False
-            except: StopIteration, "hold it"
-    
+    for item in findsMap.items():
+#         print "--start--",item
+        solver(item, dummy_sk)
+#         print "--end--\n"
     print "="*10+"end of round"+str(loop)+"="*10
-    
-    if len(fm) == 0:
-        print "\n"+"_"*5+"Solved Success!"+"_"*5+"\n"
-        break
-    
-    if stop:
-        printFindsMap(fm)
-        printSolverBreaker();
-        print "\n"+"_"*5+"Failed Ooch!"+"_"*5+"\n"
-        break
-    
-#     print "keys", fm.viewkeys()
-#     print "dic len",len(fm)
-#     printfullMatrix(dummy_sk)
+    printfullMatrix(dummy_sk)
     loop += 1
+    if not len(findsMap):
+        break;
+    elif loop > 5:
+        break
  
 printfullMatrix(sk)
 printfullMatrix(dummy_sk)
+printFindsMap(findsMap)
