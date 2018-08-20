@@ -18,7 +18,7 @@ for num in range(1, int(max**.5)+1):
             print "======",num
     up_time = time.time()-start_time
     if (up_time > 20):
-        print "break++++++++++++",num
+        print "stop",num
         print up_time
         exit(1)
 print "total time", up_time
