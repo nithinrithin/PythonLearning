@@ -1,8 +1,6 @@
 """
     program to solve sudoko
 """
-from copy import deepcopy
-from wxPython._wx import false
 
 #[[],[],[],[],[],[],[],[],[]]
 suduko = [  [4,1,8,3,0,0,0,0,6],
@@ -298,7 +296,7 @@ printfullMatrix(sk)
 printProcessResult()
 print "="*30
 
-import copy
+from copy import deepcopy
 dummy_sk = deepcopy(sk) 
 loop = 1
 
