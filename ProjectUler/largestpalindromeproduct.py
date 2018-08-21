@@ -8,7 +8,8 @@ def getDivisor(pn):
             val = pn / i
             if len(str(val)) == 3:
                 print "%d * %d = %d"%(i,val,pn)
-                exit(0)
+                
+                
 
 for i in range(9,1,-1):
     for j in range(9,1,-1):
